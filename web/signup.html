@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0077ed;
+        }
+
+        #navBar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1d1d1f;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #navMenu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+        }
+
+        #navMenu a {
+            display: block;
+            padding: 15px 20px;
+            color: #1d1d1f;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #navMenu a:hover {
+            background-color: #e5e5e5;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navBar">☰</div>
+    <div id="navMenu"></div>
+
+    <div class="container">
+        <h1>회원가입</h1>
+        <form id="signupForm">
+            <label for="email">이메일:</label>
+            <input type="email" id="email" required />
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" required />
+            <button type="submit">회원가입 하기</button>
+            <button type="button" id="loginButton">로그인 하러 가기</button>
+        </form>
+    </div>
+
+    <script type="module">
+        // Firebase 초기화
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvrjV4RuxyXJs68_ZU6KWk_bxpWyNjDSg",
+            authDomain: "login-1b7cd.firebaseapp.com",
+            projectId: "login-1b7cd",
+            storageBucket: "login-1b7cd.appspot.com",
+            messagingSenderId: "465347067090",
+            appId: "1:465347067090:web:01d2891f027821aaa4410b",
+            measurementId: "G-9VY8Y18ZF4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // 회원가입 폼 제출 이벤트 리스너
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault(); // 폼 제출 기본 동작 방지
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // 회원가입 성공
+                    const user = userCredential.user;
+                    const userId = user.uid;
+
+                    // Firebase Realtime Database에 사용자 대여 상태 초기값 설정
+                    set(ref(database, 'users/' + userId + '/currentRental'), {
+                        rent: false, // 대여 중이 아님
+                        stand_id: null,
+                        space: null,
+                        rentalStartTime: null,
+                        returnDeadline: null
+                    });
+
+                    alert('회원가입이 완료되었습니다!');
+                    window.location.href = 'map.html';
+                })
+                .catch((error) => {
+                    // 회원가입 실패
+                    const errorMessage = error.message;
+                    alert(`회원가입 오류: ${errorMessage}`);
+                });
+        });
+
+        // 로그인 페이지로 이동하는 버튼 이벤트 리스너
+        document.getElementById('loginButton').addEventListener('click', () => {
+            window.location.href = 'login.html'; // 로그인 페이지로 이동
+        });
+
+        // 네비게이션 메뉴 동적 처리
+        const navMenu = document.getElementById('navMenu');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navMenu.innerHTML = `
+                    <a href="map.html">우산개수현황</a>
+                    <a href="index.html">우산공유서비스란?</a>
+                    <a href="#" id="logout">로그아웃</a>
+                `;
+                document.getElementById('logout').addEventListener('click', () => {
+                    signOut(auth).then(() => {
+                        window.location.replace('login.html');
+                    });
+                });
+            } else {
+                navMenu.innerHTML = `
+                    <a href="login.html">로그인</a>
+                    <a href="signup.html">회원가입</a>
+                    <a href="map.html">우산개수현황</a>
+                    <a href="index.html">우산공유서비스란?</a>
+                `;
+            }
+        });
+
+        // 네비게이션 바 토글 기능 추가
+        const navBar = document.getElementById('navBar');
+
+        navBar.addEventListener('click', () => {
+            if (navMenu.style.right === '-300px') {
+                navMenu.style.right = '0';
+                navMenu.style.display = 'block';
+            } else {
+                navMenu.style.right = '-300px';
+                setTimeout(() => {
+                    navMenu.style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

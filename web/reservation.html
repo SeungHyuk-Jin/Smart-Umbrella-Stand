@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Four Buttons</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            height: 100%;
+            /* 페이지 높이를 전체로 확장 */
+            overflow-y: auto;
+            /* 세로 스크롤 활성화 */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: "Roboto", sans-serif;
+            background-color: #f5f5f5ee;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        #navBar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1d1d1f;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #navMenu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+        }
+
+        #navMenu a {
+            display: block;
+            padding: 15px 20px;
+            color: #1d1d1f;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #navMenu a:hover {
+            background-color: #e5e5e5;
+        }
+
+        h1 {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .box-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 400px;
+            justify-content: center;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(2, 140px);
+            grid-gap: 20px;
+        }
+
+        .button {
+            position: relative;
+            padding: 0;
+            width: 140px;
+            height: 140px;
+            border: 3px solid #888888;
+            outline: none;
+            background-color: #f4f5f6;
+            border-radius: 28px;
+            box-shadow: -4px -14px 24px #ffffff,
+                -4px -7px 10px #ffffff,
+                -14px 0px 21px #ffffff,
+                4px 14px 18px rgba(0, 0, 0, 0.2);
+            transition: .13s ease-in-out;
+            cursor: pointer;
+        }
+
+        .button:active {
+            box-shadow: none;
+        }
+
+        .button:active .button__content {
+            box-shadow: none;
+        }
+
+        .button:active .button__text,
+        .button:active .button__icon {
+            transform: translate3d(0px, 0px, 0px);
+        }
+
+        .button__content {
+            position: relative;
+            display: grid;
+            padding: 14px;
+            width: 100%;
+            height: 100%;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr;
+            box-shadow: inset 0px -6px 0px #dddddd, 0px -6px 0px #f4f5f6;
+            border-radius: 28px;
+            transition: .13s ease-in-out;
+            z-index: 1;
+        }
+
+        .button__icon {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            grid-row: 1;
+            width: 100%;
+            height: 100%;
+            transition: .13s ease-in-out;
+            color: inherit;
+        }
+
+        .button__text {
+            position: relative;
+            transform: translate3d(0px, -3px, 0px);
+            margin: 0;
+            grid-row: 2;
+            text-align: center;
+            font-size: 42px;
+            background-color: #555454;
+            color: transparent;
+            text-shadow: 1.4px 1.4px 2px rgba(151, 137, 137, 0.5);
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            transition: .13s ease-in-out;
+        }
+
+        .button.pressed {
+            box-shadow: none;
+        }
+
+        .button.pressed .button__content {
+            box-shadow: none;
+        }
+
+        .prompt-container {
+            position: relative;
+            /* 또는 fixed로 고정 */
+            top: auto;
+            /* 필요에 따라 조정 */
+            margin-top: 20px;
+            width: 300px;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #d3d3d3;
+            border-radius: 5px;
+        }
+
+
+        .reserve-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .reserve-button:hover {
+            background-color: #45a049;
+        }
+
+        #timer {
+            font-family: 'Roboto', sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>우산예약 및 대여</h1>
+    <div id="navBar">☰</div>
+    <div id="navMenu">
+        <a href="map.html">우산개수현황</a>
+        <a href="index.html">우산공유서비스란?</a>
+        <a href="#" id="logoutLink" style="display: none;"></a>
+    </div>
+
+    <div class="button-container">
+        <!-- 각 버튼에 id를 추가하고, 상태 표시를 위해 status 클래스를 가진 요소를 포함합니다. -->
+        <button class="button" id="space1" onclick="toggleButton(this)">
+            <div class="button__content">
+                <div class="button__icon status">❌</div>
+                <p class="button__text">1</p>
+            </div>
+        </button>
+        <button class="button" id="space2" onclick="toggleButton(this)">
+            <div class="button__content">
+                <div class="button__icon status">❌</div>
+                <p class="button__text">2</p>
+            </div>
+        </button>
+        <button class="button" id="space3" onclick="toggleButton(this)">
+            <div class="button__content">
+                <div class="button__icon status">❌</div>
+                <p class="button__text">3</p>
+            </div>
+        </button>
+        <button class="button" id="space4" onclick="toggleButton(this)">
+            <div class="button__content">
+                <div class="button__icon status">❌</div>
+                <p class="button__text">4</p>
+            </div>
+        </button>
+    </div>
+
+    <div class="prompt-container">
+        <!-- 예약 버튼과 타이머 -->
+        <button class="reserve-button" id="reserveBtn">예약</button>
+        <div id="timer" style="font-size: 24px; display: none;">15:00</div>
+
+        <!-- 대여 버튼 -->
+        <button class="reserve-button" id="rentBtn">대여</button>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+        // Firebase 초기화 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvrjV4RuxyXJs68_ZU6KWk_bxpWyNjDSg",
+            authDomain: "login-1b7cd.firebaseapp.com",
+            databaseURL: "https://login-1b7cd-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "login-1b7cd",
+            storageBucket: "login-1b7cd.appspot.com",
+            messagingSenderId: "465347067090",
+            appId: "1:465347067090:web:01d2891f027821aaa4410b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        let userID = null;
+
+        // 사용자 인증 상태 확인
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userID = user.uid; // 로그인한 사용자의 UID 설정
+            } else {
+                console.log("로그인되지 않았습니다.");
+            }
+        });
+
+        window.activeButton = null;
+
+        const rentBtn = document.getElementById("rentBtn");
+
+        // 대여 버튼 클릭 시 선택된 공간을 Firebase에 저장
+        rentBtn.addEventListener('click', () => {
+            if (window.activeButton && userID) { // userID 확인
+                const selectedSpace = window.activeButton.id;
+                const rentalRequestRef = ref(database, "umbrella_stands/rental_request");
+                const spaceRef = ref(database, `umbrella_stands/umbrellaStands/stand_1/spaces/${selectedSpace}`);
+                const userRef = ref(database, `users/${userID}/currentRental`);
+                const currentTime = new Date().toISOString();
+                const returnDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24시간 후
+
+                // 대여 요청을 기록
+                set(rentalRequestRef, {
+                    space_id: selectedSpace,
+                    stand_id: "stand_1",
+                    timestamp: currentTime,
+                    rentalStartTime: currentTime
+                })
+                    .then(() => {
+                        alert(`${selectedSpace} 대여 요청이 전송되었습니다.`);
+                    })
+                    .catch((error) => {
+                        console.error("대여 요청 전송 중 오류 발생:", error);
+                    });
+
+                // 공간 상태 변경을 감지하여 대여 완료 처리
+                onValue(spaceRef, (snapshot) => {
+                    const isRented = snapshot.val();
+                    if (isRented === false) {
+                        update(userRef, {
+                            rent: true,
+                            rentalStartTime: currentTime,
+                            returnDeadline: returnDeadline,
+                            space_id: selectedSpace,
+                            stand_id: "stand_1"
+                        })
+                            .then(() => {
+                                console.log("사용자의 대여 상태가 업데이트되었습니다.");
+                            })
+                            .catch((error) => {
+                                console.error("대여 상태 업데이트 중 오류 발생:", error);
+                            });
+
+                        if (confirm("대여가 완료되었습니다! 확인을 누르면 지도 페이지로 이동합니다.")) {
+                            window.location.href = 'map.html';
+                        }
+                    }
+                });
+            } else {
+                alert("먼저 대여할 공간을 선택하세요.");
+            }
+        });
+
+
+        // 각 공간의 상태를 감시하고 업데이트
+        const umbrellaSpaces = [
+            { id: "space1", dbPath: "umbrella_stands/umbrellaStands/stand_1/spaces/space1" },
+            { id: "space2", dbPath: "umbrella_stands/umbrellaStands/stand_1/spaces/space2" },
+            { id: "space3", dbPath: "umbrella_stands/umbrellaStands/stand_1/spaces/space3" },
+            { id: "space4", dbPath: "umbrella_stands/umbrellaStands/stand_1/spaces/space4" }
+        ];
+
+        umbrellaSpaces.forEach(space => {
+            const spaceStatusRef = ref(database, space.dbPath);
+            onValue(spaceStatusRef, (snapshot) => {
+                const isAvailable = snapshot.val();
+                const statusElement = document.querySelector(`#${space.id} .status`);
+
+                if (statusElement) {
+                    statusElement.textContent = isAvailable ? '🟢' : '🔴';
+                    statusElement.style.color = isAvailable ? '#008000' : '#FF0000';
+                }
+            });
+        });
+
+        // Firebase에서 대여 상태 감시
+        const globalSpaceRef = ref(database, "umbrella_stands/stand_1/spaces/space1"); // 중복 방지를 위해 변수명 변경
+        onValue(globalSpaceRef, (snapshot) => {
+            const isRented = snapshot.val();
+
+            if (isRented === false) {
+                const startTime = new Date();
+                const deadlineTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000); // 24시간 후
+
+
+            }
+        });
+    </script>
+
+
+    <script>
+        const reserveBtn = document.getElementById('reserveBtn');
+        const timerElement = document.getElementById('timer');
+
+        reserveBtn.addEventListener('click', () => {
+            timerElement.style.display = 'block';
+            let timeLeft = 15 * 60;
+
+            const timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.style.display = 'none';
+                }
+
+                timeLeft--;
+            }, 1000);
+        });
+
+
+        function toggleButton(button) {
+            const statusElement = button.querySelector(".status");
+
+            // 🔴 상태일 때 alert 표시 후 함수 종료
+            if (statusElement && statusElement.textContent === '🔴') {
+                alert("대여할 수 없습니다");
+                return; // 눌림 상태로 전환하지 않음
+            }
+
+            // 이전에 눌려있던 버튼의 눌림 상태 해제
+            if (window.activeButton) {
+                window.activeButton.classList.remove("pressed");
+            }
+
+            // 현재 버튼을 눌린 상태로 변경하고 activeButton 업데이트
+            button.classList.add("pressed");
+            window.activeButton = button;
+        }
+
+
+
+        const navBar = document.getElementById('navBar');
+        const navMenu = document.getElementById('navMenu');
+        const logoutLink = document.getElementById('logoutLink');
+
+        const isLoggedIn = true;
+
+        if (isLoggedIn) {
+            logoutLink.style.display = 'block';
+        } else {
+            navMenu.innerHTML += `
+                <a href="login.html" id="loginLink">로그인</a>
+                <a href="signup.html" id="signupLink">회원가입</a>
+            `;
+        }
+
+        navBar.addEventListener('click', () => {
+            if (navMenu.style.right === '-300px') {
+                navMenu.style.right = '0';
+                navMenu.style.display = 'block';
+            } else {
+                navMenu.style.right = '-300px';
+                setTimeout(() => {
+                    navMenu.style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

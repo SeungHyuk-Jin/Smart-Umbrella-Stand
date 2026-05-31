@@ -1,0 +1,94 @@
+{
+  "umbrella_stands": {
+    "rental_request": {
+      "rentalStartTime": "2024-11-06T10:43:12.668Z",
+      "space_id": "space2",
+      "stand_id": "stand_1",
+      "timestamp": "2024-11-06T10:43:12.668Z"
+    },
+    "umbrellaStands": {
+      "stand_1": {
+        "spaces": {
+          "space1": true,
+          "space2": false,
+          "space3": true,
+          "space4": false
+        },
+        "totalUmbrellas": 2,
+        "reservations": {
+          "space1": {
+            "reservedBy": "",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          },
+          "space2": {
+            "reservedBy": "USER_ID_EXAMPLE_1",
+            "reservationStartTime": "2024-11-08T11:23:45.123Z",
+            "reservationExpireTime": "2024-11-08T11:38:45.123Z"
+          },
+          "space3": {
+            "reservedBy": "",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          },
+          "space4": {
+            "reservedBy": "",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          }
+        }
+      },
+      "stand_2": {
+        "spaces": {
+          "space1": true,
+          "space2": false,
+          "space3": true,
+          "space4": false
+        },
+        "totalUmbrellas": 2,
+        "reservations": {
+          "space1": {
+            "reservedBy": "",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          },
+          "space2": {
+            "reservedBy": "USER_ID_EXAMPLE_1",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          },
+          "space3": {
+            "reservedBy": "USER_ID_EXAMPLE_1",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          },
+          "space4": {
+            "reservedBy": "",
+            "reservationStartTime": "",
+            "reservationExpireTime": ""
+          }
+        }
+      }
+    }
+  },
+  "users": {
+    "USER_ID_EXAMPLE_1": {
+      "currentRental": {
+        "stand_id": "stand_1",
+        "space_id": "space1",
+        "rent": true,
+        "rentalStartTime": "2024-11-08T11:23:45.123Z",
+        "returnDeadline": "2024-11-08T11:38:45.123Z"
+      }
+    },
+    "USER_ID_EXAMPLE_2": {
+      "currentRental": {
+        "stand_id": "stand_2",
+        "space_id": "space1",
+        "rent": false,
+        "rentalStartTime": "",
+        "returnDeadline": ""
+      }
+    }
+  }
+}

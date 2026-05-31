@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Map with Multiple Markers</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #666;
+        }
+
+        #info {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #reserveBtn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #reserveBtn:hover {
+            background-color: #0077ed;
+        }
+
+        #reserveBtn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        #returnBtn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #returnBtn:hover {
+            background-color: #0077ed;
+        }
+
+        #returnBtn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        #weatherCard {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #weatherIcon {
+            width: 80px;
+            height: 80px;
+        }
+
+        #navBar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1d1d1f;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #navMenu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+        }
+
+        #navMenu a {
+            display: block;
+            padding: 15px 20px;
+            color: #1d1d1f;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        #navMenu a:hover {
+            background-color: #e5e5e5;
+        }
+
+        #userIDDisplay {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1d1d1f;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #rentalInfo {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navBar">☰</div>
+    <div id="navMenu"></div>
+
+
+
+    <h1><a href="map.html" style="text-decoration: none; color: inherit;">우산공유서비스</a></h1>
+    <div id="weatherCard">
+        <div id="weatherDate"></div>
+        <div id="weatherLocation"></div>
+        <img id="weatherIcon" src="" alt="Weather Icon">
+        <div id="weatherTemp"></div>
+        <div id="weatherDescription"></div>
+    </div>
+    <div id="map"></div>
+    <div id="info">
+        <h3>선택한 위치의 우산 개수: <span id="umbrellaCount">0</span></h3>
+        <button id="reserveBtn" disabled>우산 예약하기</button>
+        <button id="returnBtn" disabled>우산 반납하기</button>
+        <div id="userIDDisplay"></div>
+        <div id="rentalInfo" style="display: none;">
+            <p><strong>우산 대여 상태:</strong> <span id="rentalStatus"></span></p>
+            <p><strong>대여 시작 시간/날짜:</strong> <span id="rentalStartTime"></span></p>
+            <p><strong>반납 예정 시간/날짜:</strong> <span id="returnDeadline"></span></p>
+            <p><strong>대여 위치:</strong> <span id="rentalLocation"></span></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase 초기화
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.REGION.firebasedatabase.app",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const navMenu = document.getElementById('navMenu');
+        let currentUser = null;
+        let map;
+
+        onAuthStateChanged(auth, (user) => {
+            const userIDDisplay = document.getElementById('userIDDisplay');
+            const rentalInfo = document.getElementById('rentalInfo');
+            const rentalStatusElem = document.getElementById('rentalStatus');
+            const rentalStartTimeElem = document.getElementById('rentalStartTime');
+            const returnDeadlineElem = document.getElementById('returnDeadline');
+            const rentalLocationElem = document.getElementById('rentalLocation');
+
+            currentUser = user;
+
+            if (user) {
+                userIDDisplay.style.display = 'block';
+                userIDDisplay.innerText = `사용자: ${user.uid}`; // userID 표시
+
+                navMenu.innerHTML = `
+            <a href="map.html">우산개수현황</a>
+            <a href="iindex.html">우산공유서비스란?</a>
+            <a href="#" id="logout">로그아웃</a>
+        `;
+                document.getElementById('logout').addEventListener('click', () => {
+                    signOut(auth).then(() => {
+                        window.location.reload();
+                    });
+                });
+
+                checkRentalStatus(user.uid); // 대여 상태 확인
+                initMap(); // 지도 초기화
+            } else {
+                navMenu.innerHTML = `
+            <a href="login.html">로그인</a>
+            <a href="signup.html">회원가입</a>
+            <a href="map.html">우산개수현황</a>
+            <a href="index.html">우산공유서비스란?</a>
+        `;
+                initMap(); // 인증되지 않은 사용자도 지도 이용 가능
+            }
+        });
+
+        function checkRentalStatus(userId) {
+            const currentRentalRef = ref(db, `users/${userId}/currentRental`);
+            onValue(currentRentalRef, (snapshot) => {
+                const rentalData = snapshot.val();
+                const reserveBtn = document.getElementById('reserveBtn');
+                const returnBtn = document.getElementById('returnBtn');
+                const rentalInfo = document.getElementById('rentalInfo');
+                const rentalStatusElem = document.getElementById('rentalStatus');
+                const rentalStartTimeElem = document.getElementById('rentalStartTime');
+                const returnDeadlineElem = document.getElementById('returnDeadline');
+                const rentalLocationElem = document.getElementById('rentalLocation');
+
+                // rentalInfo를 항상 표시
+                rentalInfo.style.display = 'block';
+
+                function convertToKoreanTime(isoString) {
+                    const date = new Date(isoString);
+                    const options = {
+                        month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit',
+                        timeZone: 'Asia/Seoul',
+                        hour12: true
+                    };
+                    return date.toLocaleString('ko-KR', options);
+                }
+
+                if (rentalData && rentalData.rent === true) {
+                    // 대여 중일 때 예약 버튼 비활성화, 반납 버튼 활성화
+                    reserveBtn.disabled = true;
+                    reserveBtn.innerText = "대여 중 - 예약 불가";
+                    returnBtn.disabled = false;
+                    returnBtn.innerText = "우산 반납하기";
+
+                    // 대여 관련 정보 표시
+                    rentalStatusElem.innerText = "대여 중";
+                    rentalStartTimeElem.innerText = rentalData.rentalStartTime ? convertToKoreanTime(rentalData.rentalStartTime) : "정보 없음";
+                    returnDeadlineElem.innerText = rentalData.returnDeadline ? convertToKoreanTime(rentalData.returnDeadline) : "정보 없음";
+
+                    rentalLocationElem.innerText = rentalData.stand_id === "stand_1" ? "공릉역" : rentalData.stand_id === "stand_2" ? "태릉입구역" :rentalData.stand_id === "stand_3" ? "하계역" : "정보 없음";
+
+                } else {
+                    // 대여 중이 아닐 때 예약 버튼 활성화, 반납 버튼 비활성화
+                    reserveBtn.disabled = false;
+                    reserveBtn.innerText = "우산 예약하기";
+                    returnBtn.disabled = true;
+                    returnBtn.innerText = "대여 후 반납 가능";
+
+                    // 반납 상태에서도 정보 표시
+                    rentalStatusElem.innerText = "대여 가능";
+                    rentalStartTimeElem.innerText = "정보 없음";
+                    returnDeadlineElem.innerText = "정보 없음";
+                    rentalLocationElem.innerText = "정보 없음";
+                }
+            });
+        }
+
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: { lat: 37.6259, lng: 127.0728 }
+            });
+
+            const locations = [
+                { lat: 37.6259, lng: 127.0728, title: "공릉역", dbRef: "umbrella_stands/umbrellaStands/stand_1", reservationPage: "reservation1.html", returnPage: "return1.html" },
+                { lat: 37.6184, lng: 127.0770, title: "태릉입구역", dbRef: "umbrella_stands/umbrellaStands/stand_2", reservationPage: "reservation2.html", returnPage: "return2.html" },
+                { lat: 37.6359, lng: 127.0682, title: "하계역", dbRef: "umbrella_stands/umbrellaStands/stand_3", reservationPage: "reservation3.html", returnPage: "return3.html" }
+            ];
+
+            const reserveBtn = document.getElementById('reserveBtn');
+            const returnBtn = document.getElementById('returnBtn');
+            let selectedMarker = null;
+
+            locations.forEach((location) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: location.lat, lng: location.lng },
+                    map: map,
+                    title: location.title,
+                    animation: google.maps.Animation.DROP
+                });
+
+                marker.addListener('click', () => {
+                    if (selectedMarker) {
+                        selectedMarker.setIcon(null); // 이전 선택 마커 원래 크기로
+                    }
+                    marker.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#4285F4",
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#FFFFFF",
+                    });
+                    selectedMarker = marker;
+
+                    checkRentalStatus(currentUser.uid); // 대여 상태를 다시 확인하여 버튼 상태 갱신
+
+                    const umbrellaCountRef = ref(db, `${location.dbRef}/totalUmbrellas`);
+                    onValue(umbrellaCountRef, (snapshot) => {
+                        const umbrellaCount = snapshot.val();
+                        document.getElementById('umbrellaCount').innerText = umbrellaCount;
+
+                        if (umbrellaCount === 0) {
+                            alert("해당 위치에 우산이 없습니다.");
+                        }
+
+                        reserveBtn.onclick = () => {
+                            if (!reserveBtn.disabled && confirm("우산을 이용하시겠습니까?")) {
+                                window.location.href = location.reservationPage;
+                            }
+                        };
+
+                        returnBtn.onclick = () => {
+                            if (!returnBtn.disabled && confirm("우산을 반납하시겠습니까?")) {
+                                window.location.href = location.returnPage;
+                            }
+                        };
+                    });
+                });
+            });
+
+            getUserLocationAndWeather();
+        }
+
+        function getUserLocationAndWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        new google.maps.Marker({
+                            position: userLocation,
+                            map: map,
+                            title: "현재 위치",
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 7,
+                                fillColor: "#4285F4",
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: "#FFFFFF",
+                            }
+                        });
+                        map.setCenter(userLocation);
+                        fetchWeather(userLocation.lat, userLocation.lng);
+                    },
+                    () => {
+                        alert('사용자의 위치를 가져올 수 없습니다.');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert('이 브라우저는 위치 정보를 지원하지 않습니다.');
+            }
+        }
+
+        function fetchWeather(lat, lon) {
+            const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=kr`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherCard = document.getElementById('weatherCard');
+                    const date = new Date();
+                    const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'long' };
+                    document.getElementById('weatherDate').innerText = date.toLocaleDateString('ko-KR', options);
+                    document.getElementById('weatherLocation').innerText = data.name;
+                    document.getElementById('weatherIcon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+                    document.getElementById('weatherTemp').innerText = `${data.main.temp}°C`;
+                    document.getElementById('weatherDescription').innerText = data.weather[0].description;
+                })
+                .catch(error => {
+                    console.error('날씨 정보를 가져오는 중 오류가 발생했습니다:', error);
+                });
+        }
+
+        const navBar = document.getElementById('navBar');
+        navBar.addEventListener('click', () => {
+            if (navMenu.style.right === '-300px') {
+                navMenu.style.right = '0';
+                navMenu.style.display = 'block';
+            } else {
+                navMenu.style.right = '-300px';
+                setTimeout(() => {
+                    navMenu.style.display = 'none';
+                }, 300);
+            }
+        });
+
+        window.initMap = initMap;
+    </script>
+
+    <!-- Google Maps API 불러오기 -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"
+        async defer></script>
+</body>
+
+</html>
